@@ -1,0 +1,68 @@
+version: "3"
+
+services:
+
+  postgresdb:
+    image: postgres:9.4
+    environment:
+      - POSTGRES_DB=develops_today_db
+      - POSTGRES_USER=userr
+      - POSTGRES_PASSWORD=develops_today_password
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    container_name: develops_today_app
+    build:
+      context: ./
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/usr/src/app
+    command: >
+      sh -c "python3 manage.py makemigrations --noinput &&
+             python3 manage.py migrate --noinput &&
+             python3 manage.py collectstatic --noinput &&
+             exec gunicorn test_ex.wsgi:application -b 0.0.0.0:8000 --reload"
+    depends_on:
+      - postgresdb
+
+  redis:
+    container_name: develops_today_redis
+    image: redis
+
+  celery:
+    build:
+      context: .
+    container_name: celery-worker
+    restart: always
+    command: sh -c "celery -A test_ex worker -l INFO"
+    volumes:
+      - ./:/usr/src/app
+    depends_on:
+      - redis
+      - postgresdb
+      - web
+
+# возможно выпадет ошибка при загрузке проекта связанная с бд, нужно запустить контейнер и провести миграции 
+# в другой консоли, тогда ошибка пройдет
+  celery-beat:
+    build:
+      context: .
+    image: celery
+    container_name: celery-beat
+    restart: always
+    command: celery -A test_ex beat -l INFO
+    volumes:
+      - ./:/usr/src/app
+    depends_on:
+      - redis
+      - postgresdb
+      - celery
+      - web
+
+volumes:
+  pgdata:
