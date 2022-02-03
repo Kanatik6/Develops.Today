@@ -22,15 +22,23 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+from django.conf.urls.i18n import i18n_patterns
+
+
 
 urlpatterns = [
     path("jet/", include("jet.urls", "jet")),
+    path('i18n/', include('django.conf.urls.i18n')),
     path("admin/", admin.site.urls),
-    path("posts/", include("posts.urls")),
+
     path("users/", include("users.urls")),
     path("api/", include("rest_auth.urls")),
     path("auth/", include("rest_framework.urls")),
 ]
+
+urlpatterns += i18n_patterns(
+    path("posts/", include("posts.urls")),
+)
 
 
 schema_view = get_schema_view(

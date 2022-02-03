@@ -1,9 +1,12 @@
 from pathlib import Path
+import os
+from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 SECRET_KEY = "django-insecure-y0)11y**8j8&fq4g*sn&l(*fa%_$p@$lvf37%(fdfq=@q39igy"
+a = " fbvieagverghaeirhjrgherslghi;esrgioerilhelighlieghlahrlgelrhglergelgajg"
 
 DEBUG = True
 
@@ -11,8 +14,11 @@ ALLOWED_HOSTS = []
 
 
 INSTALLED_APPS = [
+    'modeltranslation',
     # admin
     "jet",
+    # translation
+    # db
     "psycopg2",
     # standart
     "django.contrib.admin",
@@ -26,8 +32,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "drf_yasg",
-    "django_celery_results",
-    "django_celery_beat",
     # apps
     "posts",
     "users",
@@ -36,6 +40,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'django.middleware.locale.LocaleMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -64,16 +69,11 @@ TEMPLATES = [
 WSGI_APPLICATION = "test_ex.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "develops_today_db",
-        "USER": "develops_today_user",
-        "PASSWORD": "develops_today_password",
-        "HOST": "postgresdb",
-        "PORT": "5432",
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -141,19 +141,16 @@ JET_THEMES = [
 ]
 
 
-CELERY_BROKER_URL = "redis://redis:6379"
-CELERY_BROKER_TRANSPORT = "redis"
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_TIMEZONE = "Asia/Bishkek"
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60
-CELERY_RESULT_BACKEND = "django-db"
-CELERY_IMPORTS = ("posts.tasks",)
-CELERY_TASK_REJECT_ON_WORKER_LOST = True
-CELERY_ACKS_LATE = True
-CELERY_ACKS_ON_FAILURE_OR_TIMEOUT = True
+LANGUAGES = (
+    ('ru', _('Russian')),
+    ('kz', _('Kazakh')),
+    ('en', _('English')),
+)
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'ru'
 
-# # celery beat
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale')
+]
 
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+# extra lang 
